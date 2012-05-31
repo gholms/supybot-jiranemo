@@ -101,7 +101,7 @@ class Jira(callbacks.Plugin):
     assign = wrap(assign, ['somethingWithoutSpaces', 'somethingWithoutSpaces'])
 
     def benefit(self, irc, msg, args, key, b):
-        """<issue> [ Low | Medium | High ]
+        """<issue> [ low | medium | high ]
 
         Specify the Benefit for an issue (NOTE: this is a Euca-specific custom field)"""
 
@@ -113,10 +113,11 @@ class Jira(callbacks.Plugin):
         self.db.set(msg.args[0], 1, key)
 
         self.log.info("Setting benefit of %s to %s" % (key, b))
-        self.jclient.updateIssue(key, "Benefit", b)
+        self.jclient.updateIssue(key, "Benefit", b.title())
         irc.replySuccess()
 
-    benefit = wrap(benefit, ['somethingWithoutSpaces', 'somethingWithoutSpaces'])
+    benefit = wrap(benefit, ['somethingWithoutSpaces',
+                             ('literal', ('low', 'medium', 'high'))])
 
     def target(self, irc, msg, args, key, version):
         """<issue> <version> ...
