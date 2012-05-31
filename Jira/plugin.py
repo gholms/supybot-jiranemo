@@ -92,7 +92,6 @@ class Jira(callbacks.Plugin):
             if not key:
                 irc.error("No previous issue found")
                 return
-        self.db.set(msg.args[0], 1, key)
 
         self.log.info("Setting assignee of %s to %s" % (key, assignee))
         self.jclient.updateIssue(key, "assignee", assignee)
@@ -110,7 +109,6 @@ class Jira(callbacks.Plugin):
             if not key:
                 irc.error("No previous issue found")
                 return
-        self.db.set(msg.args[0], 1, key)
 
         self.log.info("Setting benefit of %s to %s" % (key, b))
         self.jclient.updateIssue(key, "Benefit", b.title())
@@ -130,7 +128,6 @@ class Jira(callbacks.Plugin):
             if not key:
                 irc.error("No previous issue found")
                 return
-        self.db.set(msg.args[0], 1, key)
 
         proj = key.split('-')[0]
         versions = [ x for x in self.jclient.restclient.get_versions(proj) if x['name'] in version.split() ]
@@ -181,7 +178,6 @@ class Jira(callbacks.Plugin):
             if not key:
                 irc.error("No previous issue found")
                 return
-        self.db.set(msg.args[0], 1, key)
 
         actions = [ x['name'] for x in self.jclient.getAvailableActions(key) ]
         if action == "list":
@@ -207,7 +203,12 @@ class Jira(callbacks.Plugin):
         Display information about an issue in Jira along with a link to
         it on the web."""
 
-        self.db.set(msg.args[0], 1, key)
+        if key == '.':
+            key = self.db.get(msg.args[0], 1).issuekey
+            if not key:
+                irc.error("No previous issue found")
+                return
+
         try:
             response_json = self.jclient.restclient.get_issue(key)
         except urllib2.HTTPError as e:
@@ -242,5 +243,12 @@ class Jira(callbacks.Plugin):
         irc.reply(' '.join(msg_bits))
 
     getissue = wrap(getissue, ['text'])
+
+    def setcurrent(self, irc, msg, args, key):
+        """<issue>
+
+        Set the "current" Jira issue, which other commands can refer to
+        with "." in place of the issue ID."""
+        self.db.set(msg.args[0], 1, key)
 
 Class = Jira
