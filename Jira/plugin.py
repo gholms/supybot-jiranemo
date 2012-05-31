@@ -77,19 +77,20 @@ class Jira(callbacks.Plugin):
           cfg.wsdl = self.registryValue('uri') + "/rpc/soap/jirasoapservice-v2?wsdl"
           authorizer = pyjira.auth.CachingInteractiveAuthorizer(cfg.authCache)
           ccAuthorizer = pyjira.auth.CookieCachingInteractiveAuthorizer(cfg.cookieCache)
-          self._jiraclient = pyjira.JiraClient(cfg.wsdl, (cfg.user, cfg.password), 
+          self._jiraclient = pyjira.JiraClient(cfg.wsdl, (cfg.user, cfg.password),
                      authorizer=authorizer, webAuthorizer=ccAuthorizer)
         return self._jiraclient
 
     def assign(self, irc, msg, args, key, assignee):
         """<issue> <assignee>
 
-        Assign an issue to a user (NOTE: this requires their jira username, not their IRC nick!)"""
+        Assign an issue to a user (NOTE: this requires their jira username,
+        not their IRC nick!)"""
 
         if key == '.':
             key = self.db.get(msg.args[0], 1).issuekey
             if not key:
-                irc.reply("No previous issue found")
+                irc.error("No previous issue found")
                 return
         self.db.set(msg.args[0], 1, key)
 
@@ -107,7 +108,7 @@ class Jira(callbacks.Plugin):
         if key == '.':
             key = self.db.get(msg.args[0], 1).issuekey
             if not key:
-                irc.reply("No previous issue found")
+                irc.error("No previous issue found")
                 return
         self.db.set(msg.args[0], 1, key)
 
@@ -126,7 +127,7 @@ class Jira(callbacks.Plugin):
         if key == '.':
             key = self.db.get(msg.args[0], 1).issuekey
             if not key:
-                irc.reply("No previous issue found")
+                irc.error("No previous issue found")
                 return
         self.db.set(msg.args[0], 1, key)
 
@@ -153,7 +154,7 @@ class Jira(callbacks.Plugin):
     def current(self, irc, msg, args):
         key = self.db.get(msg.args[0], 1).issuekey
         if not key:
-            irc.reply("No previous issue found")
+            irc.error("No previous issue found")
             return
         irc.reply("Current issue is " + key)
 
@@ -177,7 +178,7 @@ class Jira(callbacks.Plugin):
         if key == '.':
             key = self.db.get(msg.args[0], 1).issuekey
             if not key:
-                irc.reply("No previous issue found")
+                irc.error("No previous issue found")
                 return
         self.db.set(msg.args[0], 1, key)
 
