@@ -51,4 +51,9 @@ conf.registerGlobalValue(Jira, 'username',
 conf.registerGlobalValue(Jira, 'password',
         registry.String('', 'Jira password to use for authentication',
         private=True))
-
+conf.registerGlobalValue(Jira, 'requireCapabilityWrite',
+        registry.String('admin', ('Determinates what capability (if any) the '
+        'bot should require people trying to write issue data to have.')))
+conf.registerGlobalValue(Jira, 'requireCapabilityRead',
+        registry.String('', ('Determinates what capability (if any) the '
+        'bot should require people trying to read issue data to have.')))

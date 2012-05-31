@@ -81,11 +81,19 @@ class Jira(callbacks.Plugin):
                      authorizer=authorizer, webAuthorizer=ccAuthorizer)
         return self._jiraclient
 
+    def _ensure_cap(self, cap_regvalue, irc, msg):
+        cap = self.registryValue(cap_regvalue, FIXME)
+        if cap:
+            if not ircdb.checkCapability(msg.prefix, cap):
+                irc.errorNoCapability(cap, Raise=True)
+
     def assign(self, irc, msg, args, key, assignee):
         """<issue> <assignee>
 
         Assign an issue to a user (NOTE: this requires their jira username,
         not their IRC nick!)"""
+
+        self._ensure_cap('requireCapabilityWrite', irc, msg)
 
         if key == '.':
             key = self.db.get(msg.args[0], 1).issuekey
@@ -103,6 +111,8 @@ class Jira(callbacks.Plugin):
         """<issue> [ low | medium | high ]
 
         Specify the Benefit for an issue (NOTE: this is a Euca-specific custom field)"""
+
+        self._ensure_cap('requireCapabilityWrite', irc, msg)
 
         if key == '.':
             key = self.db.get(msg.args[0], 1).issuekey
@@ -122,6 +132,8 @@ class Jira(callbacks.Plugin):
 
         Specify the target version(s) for an issue, separated by spaces.
         (NOTE: this is a Euca-specific custom field)"""
+
+        self._ensure_cap('requireCapabilityWrite', irc, msg)
 
         if key == '.':
             key = self.db.get(msg.args[0], 1).issuekey
@@ -144,12 +156,15 @@ class Jira(callbacks.Plugin):
 
         Add a version to a project"""
 
+        self._ensure_cap('requireCapabilityWrite', irc, msg)
+
         self.jclient.restclient.add_version(proj, name)
         irc.replySuccess()
 
     addversion = wrap(addversion, ['somethingWithoutSpaces', 'somethingWithoutSpaces'])
 
     def current(self, irc, msg, args):
+        self._ensure_cap('requireCapabilityRead', irc, msg)
         key = self.db.get(msg.args[0], 1).issuekey
         if not key:
             irc.error("No previous issue found")
@@ -163,6 +178,8 @@ class Jira(callbacks.Plugin):
 
         List a project's versions"""
 
+        self._ensure_cap('requireCapabilityRead', irc, msg)
+
         irc.reply("Current versions in %s: %s" % (proj, ", ".join([ x['name'] for x in self.jclient.restclient.get_versions(proj) ])))
 
     getversions = wrap(getversions, ['somethingWithoutSpaces'])
@@ -172,6 +189,8 @@ class Jira(callbacks.Plugin):
 
         list: List the valid actions from this state
         <transition>: Perform the specified action.  Abbreviations are allowed and are case insensitive."""
+
+        self._ensure_cap('requireCapabilityRead', irc, msg)
 
         if key == '.':
             key = self.db.get(msg.args[0], 1).issuekey
@@ -183,6 +202,8 @@ class Jira(callbacks.Plugin):
         if action == "list":
             irc.reply("Available actions: " + ", ".join(actions))
             return
+
+        self._ensure_cap('requireCapabilityWrite', irc, msg)
 
         matches = [ x for x in actions if x.lower().startswith(action.lower()) ]
         if len(matches) == 0:
@@ -202,6 +223,8 @@ class Jira(callbacks.Plugin):
 
         Display information about an issue in Jira along with a link to
         it on the web."""
+
+        self._ensure_cap('requireCapabilityRead', irc, msg)
 
         if key == '.':
             key = self.db.get(msg.args[0], 1).issuekey
@@ -249,6 +272,9 @@ class Jira(callbacks.Plugin):
 
         Set the "current" Jira issue, which other commands can refer to
         with "." in place of the issue ID."""
+
+        self._ensure_cap('requireCapabilityRead', irc, msg)
+
         self.db.set(msg.args[0], 1, key)
 
 Class = Jira
