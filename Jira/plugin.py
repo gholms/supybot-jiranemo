@@ -82,7 +82,7 @@ class Jira(callbacks.Plugin):
         return self._jiraclient
 
     def _ensure_cap(self, cap_regvalue, irc, msg):
-        cap = self.registryValue(cap_regvalue, FIXME)
+        cap = self.registryValue(cap_regvalue)
         if cap:
             if not ircdb.checkCapability(msg.prefix, cap):
                 irc.errorNoCapability(cap, Raise=True)
