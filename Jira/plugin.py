@@ -37,6 +37,7 @@ from pyjira import types
 from jiranemo import jiracfg
 
 import json
+import restkit.errors
 import urllib2
 from urlparse import urljoin
 
@@ -239,6 +240,9 @@ class Jira(callbacks.Plugin):
                 irc.error('issue {0} does not exist.'.format(key))
             else:
                 irc.error('failed to retrieve issue data')
+            return
+        except restkit.errors.ResourceNotFound:
+            irc.error('issue {0} does not exist.'.format(key))
             return
         except ValueError:
             self.log.error('Response from server is not JSON: ' + response_content)
